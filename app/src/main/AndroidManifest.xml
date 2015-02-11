@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="br.com.llongo.longin.LoginActivity"
+            android:name="br.com.llongo.login.LoginActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize|stateHidden" >
             <intent-filter>
@@ -34,7 +34,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="br.com.llongo.home.HomdeActivity"
+            android:name="br.com.llongo.home.HomeActivity"
             android:label="@string/title_activity_homde" >
         </activity>
     </application>

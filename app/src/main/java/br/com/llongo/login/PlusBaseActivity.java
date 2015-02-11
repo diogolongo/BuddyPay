@@ -1,4 +1,4 @@
-package br.com.llongo.longin;
+package br.com.llongo.login;
 
 import android.app.Activity;
 import android.content.Intent;
