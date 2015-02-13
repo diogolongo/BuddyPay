@@ -10,8 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-import com.google.android.gms.plus.Plus;
-
 import java.io.InputStream;
 
 import llongo.com.br.buddypay.R;
@@ -36,14 +34,14 @@ public class HomeActivity extends ActionBarActivity {
      * Fetching user's information name, email, profile pic
      * */
     private void getProfileInformation() {
-        try {
-            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
-
-            }
-
-        }catch (Exception e){
-
-        }
+//        try {
+//            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
+//
+//            }
+//
+//        }catch (Exception e){
+//
+//        }
     }
 
     @Override
