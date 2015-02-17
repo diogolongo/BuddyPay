@@ -3,9 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 15
     buildToolsVersion "21.1.2"
-
     defaultConfig {
-        applicationId "llongo.com.br.buddypay"
+        applicationId 'br.com.llongo'
         minSdkVersion 15
         targetSdkVersion 20
         versionCode 1
@@ -16,6 +15,8 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    productFlavors {
     }
 }
 

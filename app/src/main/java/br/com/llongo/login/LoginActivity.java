@@ -18,16 +18,18 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.PlusClient;
 import com.google.android.gms.plus.model.people.Person;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import llongo.com.br.buddypay.R;
+import br.com.llongo.R;
+import br.com.llongo.home.HomeActivity;
 
 
 /**
@@ -38,14 +40,14 @@ import llongo.com.br.buddypay.R;
  * https://developers.google.com/+/mobile/android/getting-started#step_1_enable_the_google_api
  * and follow the steps in "Step 1" to create an OAuth 2.0 client for your package.
  */
-public class LoginActivity extends Activity implements
-        GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener , OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class LoginActivity extends Activity implements OnClickListener,
+        ConnectionCallbacks, OnConnectionFailedListener {
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final String PROFILE_PIC_SIZE = "80";
     public static final String PREFS_NAME = "MyPrefsFile";
 
     private ProgressDialog mConnectionProgressDialog;
-    private GoogleApiClient mPlusClient;
+    private PlusClient mPlusClient;
     private ConnectionResult mConnectionResult;
 
 
@@ -73,14 +75,22 @@ public class LoginActivity extends Activity implements
 //                .setActions("http://schemas.google.com/AddActivity", "http://schemas.google.com/BuyActivity")
 //                .setScopes(Scopes.PROFILE,Scopes.PLUS_ME,Scopes.PLUS_LOGIN)
 //                .build();
-        mPlusClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this).addApi(Plus.API, null)
-                .addScope(Plus.SCOPE_PLUS_LOGIN).build();
         // A barra de progresso deve ser exibida se a falha de conexão não for resolvida.
+        mPlusClient = new PlusClient.Builder(this, this, this)
+                .setActions("http://schemas.google.com/AddActivity", "http://schemas.google.com/BuyActivity")
+                .setScopes(Scopes.PROFILE,Scopes.PLUS_LOGIN,Scopes.PLUS_ME)
+                .build();
         mConnectionProgressDialog = new ProgressDialog(this);
-        mConnectionProgressDialog.setMessage("Signing in...");
+        mConnectionProgressDialog.setMessage("Signing inN...");
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mPlusClient.connect();
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -105,62 +115,17 @@ public class LoginActivity extends Activity implements
     @Override
     public void onConnected(Bundle bundle) {
         mConnectionProgressDialog.dismiss();
+//        Log.i("", bundle.toString());
         Toast.makeText(this, "User is connected!", Toast.LENGTH_LONG).show();
         getProfileInformation();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
 
     }
 
-    /**
-     * Fetching user's information name, email, profile pic
-     * */
-    private void getProfileInformation() {
-        try {
-            if (Plus.PeopleApi.getCurrentPerson(mPlusClient) != null) {
-                Person currentPerson =  Plus.PeopleApi
-                        .getCurrentPerson(mPlusClient);
-                String personName = currentPerson.getDisplayName();
-                String personPhotoUrl = currentPerson.getImage().getUrl();
-                String personGooglePlusProfile = currentPerson.getUrl();
-                String email = Plus.AccountApi.getAccountName(mPlusClient);
-                Log.e(TAG, "Name: " + personName + ", plusProfile: "
-                        + personGooglePlusProfile + ", email: " + email
-                        + ", Image: " + personPhotoUrl);
-
-//                txtName.setText(personName);
-//                txtEmail.setText(email);
-
-                // by default the profile url gives 50x50 px image only
-                // we can replace the value with whatever dimension we want by
-                // replacing sz=X
-                personPhotoUrl = personPhotoUrl.substring(0,
-                        personPhotoUrl.length() - 2)
-                        + PROFILE_PIC_SIZE;
-
-//                new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
-
-            } else {
-                Toast.makeText(getApplicationContext(),
-                        "Person information is null", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     @Override
     public void onDisconnected() {
-        Log.d(TAG, "disconnected");
-    }
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mPlusClient.connect();
-
 
     }
+
 
     @Override
     protected void onStop() {
@@ -187,6 +152,32 @@ public class LoginActivity extends Activity implements
         mConnectionResult = result;
 
     }
+    /**
+     * Fetching user's information name, email, profile pic
+     * */
+    private void getProfileInformation() {
+        try {
+            if (mPlusClient.getCurrentPerson() != null) {
+                SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, 0);
+                Person currentPerson = mPlusClient.getCurrentPerson();
+                SharedPreferences.Editor edit = sharedPreferences.edit();
+                edit.putString("name",currentPerson.getDisplayName());
+                edit.putString("email",mPlusClient.getAccountName());
+                edit.putString("pic",currentPerson.getImage().getUrl());
+                String personGooglePlusProfile = currentPerson.getUrl();
+                String email = mPlusClient.getAccountName();
+                edit.commit();
+                Intent intent = new Intent(this, HomeActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "Person information is null", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void onClick(View view) {

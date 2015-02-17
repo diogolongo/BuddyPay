@@ -1,5 +1,6 @@
 package br.com.llongo.home;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -8,20 +9,35 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import java.io.InputStream;
 
-import llongo.com.br.buddypay.R;
+import br.com.llongo.R;
 
 public class HomeActivity extends ActionBarActivity {
+    public static final String PREFS_NAME = "MyPrefsFile";
+
+    private ImageView pic;
+    private EditText name;
+    private EditText email;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        pic = (ImageView) findViewById(R.id.pic);
+        name = (EditText) findViewById(R.id.name);
+        email = (EditText) findViewById(R.id.email);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getProfileInformation();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -34,14 +50,8 @@ public class HomeActivity extends ActionBarActivity {
      * Fetching user's information name, email, profile pic
      * */
     private void getProfileInformation() {
-//        try {
-//            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
-//
-//            }
-//
-//        }catch (Exception e){
-//
-//        }
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, 0);
+        name.setText(sharedPreferences.getString("name",""));
     }
 
     @Override
